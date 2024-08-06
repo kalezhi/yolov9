@@ -195,21 +195,30 @@ class ConfusionMatrix:
         ticklabels = (names + ['background']) if labels else "auto"
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')  # suppress empty matrix RuntimeWarning: All-NaN slice encountered
-            sn.heatmap(array,
+            myheatmap=sn.heatmap(array,
                        ax=ax,
                        annot=nc < 30,
                        annot_kws={
-                           "size": 8},
+                           "size": 18},
                        cmap='Blues',
                        fmt='.2f',
                        square=True,
                        vmin=0.0,
                        xticklabels=ticklabels,
-                       yticklabels=ticklabels).set_facecolor((1, 1, 1))
+                       yticklabels=ticklabels)
+            myheatmap.set_xticklabels(myheatmap.get_xticklabels(), rotation=90, fontsize=18)
+            myheatmap.set_yticklabels(myheatmap.get_yticklabels(), rotation=0, fontsize=18)
+            myheatmap.tick_params(labelsize=18)
+            myheatmap.set_facecolor((1, 1, 1))
+        # mylabelfont added by me, 3 Aug 2024
+        mylabelfont={'size':'18'}  # Adjust to fit      
         ax.set_ylabel('True')
-        ax.set_ylabel('Predicted')
-        ax.set_title('Confusion Matrix')
-        fig.savefig(Path(save_dir) / 'confusion_matrix.png', dpi=250)
+        ax.set_xlabel('True') # added by me
+        ax.set_ylabel('Predicted', fontdict=mylabelfont)
+        ax.set_xlabel('Observed', fontdict=mylabelfont)
+        ax.set_title('Confusion Matrix', fontdict=mylabelfont)
+        fig.savefig(Path(save_dir) / 'confusion_matrix.png', dpi=300)
+        sn.set(font_scale=1.0 if nc < 50 else 0.8)  # for label size
         plt.close(fig)
 
     def print(self):
@@ -359,18 +368,20 @@ def plot_pr_curve(px, py, ap, save_dir=Path('pr_curve.png'), names=()):
 
     if 0 < len(names) < 21:  # display per-class legend if < 21 classes
         for i, y in enumerate(py.T):
-            ax.plot(px, y, linewidth=1, label=f'{names[i]} {ap[i, 0]:.3f}')  # plot(recall, precision)
+            ax.plot(px, y, linewidth=3, label=f'{names[i]} {ap[i, 0]:.3f}')  # plot(recall, precision)
     else:
-        ax.plot(px, py, linewidth=1, color='grey')  # plot(recall, precision)
+        ax.plot(px, py, linewidth=3, color='grey')  # plot(recall, precision)
 
-    ax.plot(px, py.mean(1), linewidth=3, color='blue', label='all classes %.3f mAP@0.5' % ap[:, 0].mean())
-    ax.set_xlabel('Recall')
-    ax.set_ylabel('Precision')
+    ax.plot(px, py.mean(1), linewidth=5, color='blue', label='all classes %.3f mAP@0.5' % ap[:, 0].mean())
+    ax.set_xlabel('Recall',fontsize=20)
+    ax.set_ylabel('Precision',fontsize=20)
     ax.set_xlim(0, 1)
     ax.set_ylim(0, 1)
-    ax.legend(bbox_to_anchor=(1.04, 1), loc="upper left")
-    ax.set_title('Precision-Recall Curve')
-    fig.savefig(save_dir, dpi=250)
+    ax.legend(bbox_to_anchor=(1.04, 1),fontsize="15", loc="upper left")
+    ax.set_title('Precision-Recall Curve', fontsize=20)
+    plt.setp(ax.get_xticklabels(), fontsize=20)
+    plt.setp(ax.get_yticklabels(), fontsize=20)
+    fig.savefig(save_dir, dpi=300)
     plt.close(fig)
 
 
